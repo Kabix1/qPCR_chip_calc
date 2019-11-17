@@ -21,17 +21,36 @@ def read_datafile(path, config, num_rows):
         data = [row for row in reader]
     return data[:num_rows]
 
+
 def calc_ct_values(series, config):
+    def get_ct_avg(series):
+        ct1 = next(series)["Ct"]
+        ct2 = next(series)["Ct"]
+        if not ct1:
+            ct1 = ct2
+        if not ct2:
+            ct2 = ct1
+        if not ct1:
+            raise Exception
+        return (float(ct1) + float(ct2)) / 2
+
     result = {}
     for sample in config["samples"]:
         ct_values = {}
         for ab in config["antibodies"]:
-            avg = (float(next(series)["Ct"]) + float(next(series)["Ct"])) / 2
-            ct_values[ab] = avg
-        avg = (float(next(series)["Ct"]) + float(next(series)["Ct"])) / 2
-        ct_values["input"] = avg
+            try:
+                ct_values[ab] = get_ct_avg(series)
+            except Exception:
+                print(f"Two empty values in {ab}")
+                raise
+        try:
+            ct_values["input"] = get_ct_avg(series)
+        except Exception:
+            print(f"Two empty values in input for {ab}")
+            raise
         result[sample] = ct_values
     return result
+
 
 def take_IgG_diff(ct_values, config):
     result = {}
@@ -94,9 +113,8 @@ def create_graph(final, config):
     colors = ["red", "green", "blue", "purple", "pink", "yellow"]
     fig = make_subplots(
         rows=rows, cols=cols,
-        shared_xaxes=True,
         subplot_titles=antibodies,
-        vertical_spacing=0.03,
+        vertical_spacing=0.09,
         horizontal_spacing=0.03,)
 
     for i, ab in enumerate(antibodies):
