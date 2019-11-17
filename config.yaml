@@ -1,0 +1,23 @@
+antibodies:
+  - TBP
+  - SL1
+  - RRN3
+  - Pol1R
+  - CHD4
+  - UBF1
+  - IgG
+  
+samples:
+  - Untreated
+  - Scr
+  - 32KD
+  - 38KD
+
+controls:
+  - NTC
+
+input_volume: 10
+
+num_replicates: 2
+
+header_row: 9
